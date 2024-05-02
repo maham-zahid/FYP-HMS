@@ -16,6 +16,7 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import { useAppStore } from '../appStore';
+import { useNavigate } from 'react-router-dom';
 
 
 const AppBar = styled(MuiAppBar, {
@@ -24,6 +25,10 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 export default function Navbar() {
+
+  const navigate = useNavigate();
+
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
     const updateOpen = useAppStore((state) => state.updateOpen);
@@ -41,9 +46,11 @@ export default function Navbar() {
   };
 
   const handleMenuClose = () => {
+    navigate('/Profile');
     setAnchorEl(null);
     handleMobileMenuClose();
   };
+  
 
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -67,7 +74,6 @@ export default function Navbar() {
       onClose={handleMenuClose}
     >
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
     </Menu>
   );
 

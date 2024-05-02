@@ -16,6 +16,8 @@ app.use(cors());
 app.use(bodyParser.json());
 // Use JSON middleware to parse incoming requests
 app.use(express.json());
+
+
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -31,6 +33,8 @@ db.connect((err) => {
     console.log('Database connected!');
 });
 
+
+//for login page
 app.post('/login', (req, res) => {
     const sql = 'SELECT * FROM login WHERE email=? AND password=?';
 
@@ -45,6 +49,8 @@ app.post('/login', (req, res) => {
     });
 });
 
+
+//for signup page
 app.post('/signup', (req, res) => {
     const { name, email, phone, password } = req.body;
 
@@ -77,6 +83,7 @@ app.post('/signup', (req, res) => {
 });
 
 
+//for forgot password
 app.post('/Forgotpwd', async (req, res) => {
     const { email } = req.body;
 
@@ -139,6 +146,8 @@ app.post('/Forgotpwd', async (req, res) => {
     }
 });
 
+
+//for reset password
 app.post('/Resetpwd', (req, res) => {
     const { token, password } = req.body;
     
@@ -168,19 +177,8 @@ app.post('/Resetpwd', (req, res) => {
     });
 });
 
-
-
-
- // Serve React app
-app.use(express.static(path.join(__dirname, '../hmsFrontend/build')));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../hmsFrontend/build', 'index.html'));
-});
-
-
 //open excel file for students data
-let workbook = xlsx.readFile('Students.xlsx');
+let workbook = xlsx.readFile('Student.xlsx');
 let worksheet = workbook.Sheets[workbook.SheetNames[0]];
 let range = xlsx.utils.decode_range(worksheet["!ref"]);
 
@@ -189,11 +187,15 @@ for(let row = range.s.r + 1; row<= range.e.r; row++){
 
     for(let col = range.s.c; col<=range.e.c; col++){
         let cell = worksheet[xlsx.utils.encode_cell({r:row, c:col})]
-        data.push(cell.v)
+        if (cell) {
+            data.push(cell.v);
+        } else {
+            data.push(null); // or some default value
+        }
     }
     //console.log(data)
 
-    const sql = 'INSERT INTO students (SGID, name, cnic, dept, program, session, s_start, s_end, room, r_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const sql = 'INSERT INTO Students (SGID, name, cnic, dept, program, session, s_start, s_end, room, r_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     db.query(sql, data, (err,results,fields)=>{
         if(err){
             return console.error(err.message)
@@ -203,28 +205,75 @@ for(let row = range.s.r + 1; row<= range.e.r; row++){
 }
 
 
-app.get('/ResidentDetails', (req, res) => {
-    const sql = "SELECT * FROM students";
-    db.query(sql, (err, data) => {
-        if (err) {
-            console.error('Error fetching student data:', err);
-            return res.status(500).json({ error: 'Internal Server Error' });
+
+
+// Define a route to retrieve data from the login table
+app.get("/api/users", (req, res) => {
+    // Execute a MySQL query to select all data from the login table
+    db.query("SELECT * FROM login", (err, rows) => {
+        if (!err) {
+            // If the query is successful, send the data as a response
+            res.send(rows);
+        } else {
+            // If there's an error, log the error and send an error response
+            console.log(err);
+            res.status(500).json({ error: 'Internal Server Error' });
         }
-        
-        // Convert data to JSON format
-        const jsonData = JSON.stringify(data);
-        
-        // Set Content-Type header
-        res.setHeader('Content-Type', 'application/json');
-        
-        // Send JSON response
-        return res.send(jsonData);
     });
 });
 
 
-
-
-app.listen(8081, () => {
-    console.log('Listening on port 8081');
+//api to fetch data from student table
+app.get("/api/students", (req, res) => {
+    // Execute a MySQL query to select all data from the login table
+    db.query("SELECT * FROM Students GROUP BY CNIC", (err, rows) => {
+        if (!err) {
+            // If the query is successful, send the data as a response
+            res.send(rows);
+        } else {
+            // If there's an error, log the error and send an error response
+            console.log(err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
 });
+
+// Update a student record by serial
+app.put("/api/students/:serial", (req, res) => {
+    const studentSerial = req.params.serial;
+    const updatedData = req.body; // Updated data sent in the request body
+
+    // Execute a MySQL query to update the student record
+    db.query("UPDATE Students SET ? WHERE SerialNo = ?", [updatedData, studentSerial], (err, result) => {
+        if (!err) {
+            if (result.affectedRows === 1) {
+                // If the update is successful, send a success response
+                res.json({ success: true, message: "Student record updated successfully" });
+            } else {
+                // If no rows were affected (student not found), send a not found response
+                res.status(404).json({ error: 'Student not found' });
+            }
+        } else {
+            // If there's an error, log the error and send an error response
+            console.error("Error updating student record:", err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+});
+
+
+// Serve React app
+app.use(express.static(path.join(__dirname, '../hmsFrontend/build')));
+
+// Handle all other routes by serving the React app
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../hmsFrontend/build', 'index.html'));
+});
+
+
+// Start the server
+const PORT = process.env.PORT || 8081;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+

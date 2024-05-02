@@ -8,6 +8,8 @@ import Resetpwd from './pages/Resetpwd';
 import Home1 from './pages/Home1';
 import ResidentDetails from './pages/ResidentDetails';
 import RoomAllocation from './pages/RoomAllocation';
+import Profile from './pages/Profile';
+import UpdateDetails from './pages/UpdateDetails';
 
 function App() {
   return (
@@ -20,7 +22,9 @@ function App() {
         <Route path="/Resetpwd/:token" element={<Resetpwd />}></Route> 
         <Route path='/Dashboard' element={<Dashboard/>}></Route>
         <Route path='/ResidentDetails' element={<ResidentDetails/>}></Route>
-        <Route path='/RoomAllocation' element={<RoomAllocation/>}></Route>
+        <Route path='/UpdateDetails' element={<UpdateDetails/>}></Route>
+        <Route path='/RoomAllocation/:serial' element={<RoomAllocation/>}></Route>
+        <Route path='/Profile' element={<Profile/>}></Route>
         
         
       </Routes>    

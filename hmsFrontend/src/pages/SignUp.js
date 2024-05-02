@@ -32,6 +32,7 @@ export default function SignUp() {
             });
         }
     }, [errors]);
+    
     const handleSubmit = (event) => {
         event.preventDefault();
         const validationErrors = signValidation(values);
@@ -55,7 +56,7 @@ export default function SignUp() {
   return (
     <div className='reset-container' style={{display: 'flex', height: '100vh', border: '25px solid #187A85'}}>
         
-        <div className='p-3 rounded w-25 ' style={{ width: '400px', height: '535px', marginLeft: '500px', marginTop: '15px', border:'5px solid #187A85'}}>
+        <div className='p-3 rounded w-25 ' style={{ width: '400px', height: '535px', marginLeft: '580px', marginTop: '15px', border:'5px solid #187A85'}}>
             <form action="" onSubmit={handleSubmit}>
                 <span>
                     <div>

@@ -24,6 +24,8 @@ export default function Login() {
                 .then(res => {
                     console.log(res.data);
                     if (res.status === 200) {
+                        
+                        localStorage.setItem('userEmail', values.email);
                         // Redirect to the Dashboard if login is successful
                         window.location.href = res.data.redirectTo;
                     } else if (res.status === 401 && res.data.error === "No record found") {
